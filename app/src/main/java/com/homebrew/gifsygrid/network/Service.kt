@@ -11,9 +11,9 @@ interface Service {
 
     @GET("/v1/gifs/search")
     suspend fun getGifBySearch(
-        @Query("api_key") api_key: String="bHjmyGtL9zIg4HBCGa0qDxcvT47C9XDK",
+        @Query("api_key") api_key: String="cnwVIVJ20DngG5MaSMKqCMjz86MtfZHs",
         @Query("q") q: String,
-        @Query("limit") limit:Int= 4,
+        @Query("limit") limit:Int= 8,
         @Query("offset") offset: Int = 0,
         @Query("rating") rating:String="g",
         @Query("lang")  lang : String="en",
@@ -22,8 +22,9 @@ interface Service {
 
     @GET("gifs/trending")
     suspend fun getTrendingGifs(
-        @Query("offset") offset: Int,
-        @Query("limit") limit: Int
+        @Query("api_key") api_key: String="cnwVIVJ20DngG5MaSMKqCMjz86MtfZHs",
+        @Query("offset") offset: Int=0,
+        @Query("limit") limit: Int=12
     ): SearchData
 
     @GET

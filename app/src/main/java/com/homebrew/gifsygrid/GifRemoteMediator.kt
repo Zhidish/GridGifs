@@ -31,20 +31,17 @@ class GifRemoteMediator(
             LoadType.REFRESH -> 0
             LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
             LoadType.APPEND -> {
-                val lastItem = state.lastItemOrNull() ?: return MediatorResult.Success(
-                    endOfPaginationReached = true
-                )
-                state.pages.size * state.config.pageSize
+                database.gifDao().countGifs(query)
             }
         }
 
         try {
             val response = if (query.isBlank()) {
-                apiService.getTrendingGifs(offset = page, limit = state.config.pageSize)
+                apiService.getTrendingGifs(offset = page*state.config.pageSize, limit = state.config.pageSize)
             } else {
                 apiService.getGifBySearch(
                     q = query,
-                    offset = page,
+                    offset = page*state.config.pageSize,
                     limit =  state.config.pageSize
                 )
             }
@@ -65,9 +62,10 @@ class GifRemoteMediator(
             }
 
             database.withTransaction {
-                if (loadType == LoadType.REFRESH && page == 0) {
+                if (loadType == LoadType.REFRESH ) {
                     database.gifDao().clearAll()
                 }
+
                 database.gifDao().insertAll(gifEntities)
             }
 

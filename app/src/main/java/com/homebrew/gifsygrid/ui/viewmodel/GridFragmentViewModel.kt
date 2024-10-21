@@ -24,12 +24,12 @@ class GridFragmentViewModel(
     private val context: Context
 ) : ViewModel() {
 
-    private val currentQuery = MutableStateFlow("cat")
+    private val currentQuery = MutableStateFlow("")
 
     @OptIn(ExperimentalPagingApi::class, ExperimentalCoroutinesApi::class)
     val gifs: Flow<PagingData<GifEntity>> = currentQuery.flatMapLatest { query ->
         Pager(
-            config = PagingConfig(pageSize = 20),
+            config = PagingConfig(pageSize = 8),
             remoteMediator = GifRemoteMediator(query, database, apiService, context),
             pagingSourceFactory = {
                 if (query.isEmpty()) {

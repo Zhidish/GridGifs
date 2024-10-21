@@ -51,7 +51,6 @@ class GridFragment : Fragment() {
 
                 val bundle = Bundle().apply {
                     putInt("position", positon)
-
                 }
 
                 findNavController().navigate(
@@ -65,14 +64,20 @@ class GridFragment : Fragment() {
             }
         )
 
+        gridFragmentBinding.searchButton.setOnClickListener {
+            val query = gridFragmentBinding.searchBar.text.toString()
+            gridFragmentViewModel.searchGifs(query)
+        }
+
         gridFragmentBinding.GifsRecycler.adapter = gridAdapter
-        gridFragmentBinding.GifsRecycler.addItemDecoration(GridSpacing(2,150,true))
+      //  gridFragmentBinding.GifsRecycler.addItemDecoration(GridSpacing(2,150,true))
         gridFragmentBinding.GifsRecycler.layoutManager = GridLayoutManager(requireContext(),2)
 
 
         lifecycleScope.launchWhenStarted {
            gridFragmentViewModel.gifs.collectLatest { pagingData ->
                 gridAdapter.submitData(pagingData)
+               gridAdapter.refresh()
             }
         }
     }

@@ -33,4 +33,14 @@ interface GifDao {
     ORDER BY id
 """)
     fun getAllGifs(): PagingSource<Int, GifEntity>
+
+
+
+    @Query("""
+        SELECT COUNT(*) FROM gifs 
+        WHERE isDeleted = 0 AND (:query IS NULL OR :query = '' OR title LIKE '%' || :query || '%')
+    """)
+    suspend fun countGifs(query: String?): Int
+
+
 }
