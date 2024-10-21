@@ -6,32 +6,51 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.homebrew.gifsygrid.R
+import com.homebrew.gifsygrid.db.GifEntity
 import com.homebrew.gifsygrid.network.Gif
+import java.io.File
 
 
 class GifGridAdapter(
     private val context: Context,
-    private var gifUrls: List<Gif>,
-    private val onItemClick: (Int) -> Unit
-) : RecyclerView.Adapter<GifGridAdapter.GifViewHolder>() {
+    private val onItemClick: (Int, List<GifEntity>) -> Unit,
+    private val onDeleteClick: (String) -> Unit
+) : PagingDataAdapter<GifEntity, GifGridAdapter.GifViewHolder>(GifComparator) {
 
     inner class GifViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val gifImageView: ImageView = itemView.findViewById(R.id.gifItem)
+        private val deleteButton: ImageButton = itemView.findViewById(R.id.deleteButton)
+        fun bind(gifEntity: GifEntity?) {
+            if (gifEntity == null) return
 
-        fun bind(position: Int) {
+            // Load GIF from local file
             Glide.with(context)
                 .asGif()
-                .load(gifUrls[position].images?.fixedWidth?.url)
+                .load(File(gifEntity.imagePath))
+                .override(400,400)
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(gifImageView)
 
-
-            Log.e("Giphy","${gifUrls[position].images?.fixedWidth?.url}")
             itemView.setOnClickListener {
-                onItemClick(position)  // Handle click and pass the position
+                // Get the current list of items
+                val currentList = snapshot().items
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemClick(position, currentList)
+                }
+            }
+
+            deleteButton.setOnClickListener {
+                onDeleteClick(gifEntity.id)
             }
         }
     }
@@ -42,14 +61,19 @@ class GifGridAdapter(
     }
 
     override fun onBindViewHolder(holder: GifViewHolder, position: Int) {
-        holder.bind(position)
+        val gifEntity = getItem(position)
+        holder.bind(gifEntity)
     }
 
-    override fun getItemCount() = gifUrls.size
+    object GifComparator : DiffUtil.ItemCallback<GifEntity>() {
+        override fun areItemsTheSame(oldItem: GifEntity, newItem: GifEntity): Boolean {
+            return oldItem.id == newItem.id
+        }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun updateGrid(list : List<Gif>){
-        gifUrls = list
-        notifyDataSetChanged()
+        override fun areContentsTheSame(oldItem: GifEntity, newItem: GifEntity): Boolean {
+            return oldItem == newItem
+        }
     }
+
 }
+

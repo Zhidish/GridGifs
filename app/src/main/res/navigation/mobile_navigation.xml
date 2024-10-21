@@ -13,6 +13,17 @@
     <fragment
         android:id="@+id/gridFragment"
         android:name="com.homebrew.gifsygrid.ui.GridFragment"
-        android:label="GridFragment" />
+        android:label="GridFragment" >
+        <action
+            android:id="@+id/action_gridFragment_to_fullScreenFragment"
+            app:destination="@id/fullScreenFragment" />
+        <argument
+            android:name="position"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/fullScreenFragment"
+        android:name="com.homebrew.gifsygrid.ui.FullScreenFragment"
+        android:label="FullScreenFragment" />
 
 </navigation>
